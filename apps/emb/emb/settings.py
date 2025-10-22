@@ -19,6 +19,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django_tasks',
+    'django_tasks.backends.database',
     'bridge',
     'aimodel',
 ]
@@ -45,26 +46,44 @@ DATABASES = {
 # Django Tasks Configuration
 # bridge uses redis-web (port 6379) to receive tasks from web project
 # aimodel uses redis-emb (port 6380) for internal task processing
-TASKS = {
-    "default": {
-        "BACKEND": "django_tasks.backends.redis.RedisBackend",
-        "BACKEND_OPTIONS": {
-            "url": "redis://localhost:6380/0",
+# For production with Docker and Redis, set USE_REDIS=1
+# For testing, uses database backend
+import os
+if os.environ.get('USE_REDIS'):
+    TASKS = {
+        "default": {
+            "BACKEND": "django_tasks.backends.rq.RQBackend",
+            "BACKEND_OPTIONS": {
+                "url": "redis://localhost:6380/0",
+            },
         },
-    },
-    "bridge": {
-        "BACKEND": "django_tasks.backends.redis.RedisBackend",
-        "BACKEND_OPTIONS": {
-            "url": "redis://localhost:6379/0",
+        "bridge": {
+            "BACKEND": "django_tasks.backends.rq.RQBackend",
+            "BACKEND_OPTIONS": {
+                "url": "redis://localhost:6379/0",
+            },
         },
-    },
-    "aimodel": {
-        "BACKEND": "django_tasks.backends.redis.RedisBackend",
-        "BACKEND_OPTIONS": {
-            "url": "redis://localhost:6380/0",
+        "aimodel": {
+            "BACKEND": "django_tasks.backends.rq.RQBackend",
+            "BACKEND_OPTIONS": {
+                "url": "redis://localhost:6380/0",
+            },
         },
-    },
-}
+    }
+else:
+    # For testing, use immediate backend which executes tasks synchronously
+    # This allows testing without running workers
+    TASKS = {
+        "default": {
+            "BACKEND": "django_tasks.backends.immediate.ImmediateBackend",
+        },
+        "bridge": {
+            "BACKEND": "django_tasks.backends.immediate.ImmediateBackend",
+        },
+        "aimodel": {
+            "BACKEND": "django_tasks.backends.immediate.ImmediateBackend",
+        },
+    }
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'

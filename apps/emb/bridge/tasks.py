@@ -25,7 +25,11 @@ def process_sensitive_data(sensitive_data):
 
     # Enqueue task to second emb component (AI model)
     print(f"[Bridge] Enqueueing task to AI model component")
-    result = process_with_ai_model(non_sensitive_data)
+    task_result = process_with_ai_model.enqueue(non_sensitive_data)
+
+    # Wait for the result (this blocks until the task completes)
+    # In database backend mode, tasks execute immediately
+    result = task_result.return_value
 
     print(f"[Bridge] Received result from AI model: {result}")
     return result
