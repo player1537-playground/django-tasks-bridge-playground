@@ -3,6 +3,9 @@ deps/postgres/
 deps/redis-web/
 deps/redis-emb/
 
+# Library source code
+libs/
+
 # Python
 __pycache__/
 *.py[cod]

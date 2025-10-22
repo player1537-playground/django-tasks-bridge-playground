@@ -1,0 +1,22 @@
+[project]
+name = "web"
+version = "0.1.0"
+description = "Web Service with Sensitive Data"
+requires-python = ">=3.13"
+dependencies = [
+    "django>=5.0,<6.0",
+    "psycopg2-binary>=2.9.0",
+    "redis>=5.0.0",
+    "django-rq>=2.10.0",
+    "django-tasks[rq]",
+]
+
+[tool.setuptools.packages.find]
+include = ["web*", "core*"]
+
+[tool.uv.sources]
+django-tasks = { path = "../../libs/django_tasks", editable = true }
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

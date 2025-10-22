@@ -1,0 +1,21 @@
+[project]
+name = "w2e"
+version = "0.1.0"
+description = "Web-to-Embedding Bridge"
+requires-python = ">=3.13"
+dependencies = [
+    "django>=5.0,<6.0",
+    "redis>=5.0.0",
+    "django-rq>=2.10.0",
+    "django-tasks[rq]",
+]
+
+[tool.setuptools.packages.find]
+include = ["w2e*", "bridge*"]
+
+[tool.uv.sources]
+django-tasks = { path = "../../libs/django_tasks", editable = true }
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

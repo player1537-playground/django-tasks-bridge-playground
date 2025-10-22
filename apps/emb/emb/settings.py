@@ -33,10 +33,12 @@ if os.environ.get('USE_REDIS'):
         "default": {
             "BACKEND": "django_tasks.backends.rq.RQBackend",
             "BACKEND_OPTIONS": {"url": "redis://localhost:6380/0"},
+            "QUEUES": ["default", "aimodel"],
         },
         "aimodel": {
             "BACKEND": "django_tasks.backends.rq.RQBackend",
             "BACKEND_OPTIONS": {"url": "redis://localhost:6380/0"},
+            "QUEUES": ["aimodel"],
         },
     }
 
