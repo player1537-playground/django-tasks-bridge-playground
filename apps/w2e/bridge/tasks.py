@@ -1,50 +1,9 @@
 """
 Bridge tasks - converts sensitive data to non-sensitive data
 """
-from django_tasks import task, task_backends
-from django_tasks.base import Task, TaskResult
-from dataclasses import dataclass
+from django_tasks import task
+from aimodel.tasks import process_with_ai_model
 import time
-
-
-# External task reference for cross-project enqueueing
-# This references the aimodel task without importing it
-def _external_aimodel_task_placeholder(data: str) -> str:
-    """
-    Placeholder function that represents the external aimodel task.
-    This is never actually called - it's only used to create a Task reference.
-    """
-    raise NotImplementedError("This is a placeholder for cross-project task reference")
-
-
-# Create a task reference to the external aimodel.tasks.process_with_ai_model
-# We override the module_path property to point to the actual external task
-# We also override __post_init__ to skip validation since this is a cross-project reference
-@dataclass(frozen=True)
-class ExternalTaskReference(Task):
-    """A Task reference that points to an external module path"""
-    _external_module_path: str = ""
-
-    def __post_init__(self) -> None:
-        # Skip validation for external task references
-        pass
-
-    @property
-    def module_path(self) -> str:
-        return self._external_module_path or super().module_path
-
-
-# Create task reference for the aimodel task
-aimodel_task_ref = ExternalTaskReference(
-    func=_external_aimodel_task_placeholder,
-    priority=0,
-    backend="aimodel",
-    queue_name="aimodel",
-    run_after=None,
-    enqueue_on_commit=None,
-    takes_context=False,
-    _external_module_path="aimodel.tasks.process_with_ai_model"
-)
 
 
 @task(backend="bridge", queue_name="bridge")
@@ -65,14 +24,9 @@ def process_sensitive_data(sensitive_data):
     non_sensitive_data = "second-emb-request"
     print(f"[W2E Bridge] De-sensitized data: {non_sensitive_data}")
 
-    # Enqueue task to emb AI model using django-tasks RQ backend
+    # Enqueue task to emb AI model using the dummy task reference
     print(f"[W2E Bridge] Enqueueing task to emb AI model")
-    backend = task_backends['aimodel']
-    task_result: TaskResult = backend.enqueue(
-        aimodel_task_ref,
-        args=(non_sensitive_data,),
-        kwargs={}
-    )
+    task_result = process_with_ai_model.enqueue(non_sensitive_data)
 
     # Wait for the result (this blocks until the task completes)
     max_wait = 30

@@ -16,17 +16,15 @@ INSTALLED_APPS = [
     'django_tasks',
     'django_rq',  # For RQ worker management commands
     'core',
+    'bridge',  # Dummy task stubs for cross-project references
 ]
 
-# Database configuration - PostgreSQL with sensitive data
+# Database configuration - SQLite (for demo purposes)
+# In production, this would be PostgreSQL with sensitive data
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'webdb',
-        'USER': 'webuser',
-        'PASSWORD': 'webpass',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

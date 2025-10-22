@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["web*", "core*"]
+include = ["web*", "core*", "bridge*"]
 
 [tool.uv.sources]
 django-tasks = { path = "../../libs/django_tasks", editable = true }

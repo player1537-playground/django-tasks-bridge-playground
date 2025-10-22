@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'django_tasks',
     'django_rq',  # For RQ worker management commands
     'bridge',
+    'aimodel',  # Dummy task stubs for cross-project references
 ]
 
 # Minimal database configuration (required by Django)

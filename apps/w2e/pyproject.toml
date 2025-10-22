@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["w2e*", "bridge*"]
+include = ["w2e*", "bridge*", "aimodel*"]
 
 [tool.uv.sources]
 django-tasks = { path = "../../libs/django_tasks", editable = true }
