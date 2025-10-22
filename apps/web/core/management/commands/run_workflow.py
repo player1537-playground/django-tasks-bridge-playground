@@ -5,7 +5,7 @@ NOTE: This command requires USE_REDIS=1 to work, as it enqueues tasks
 by name string to be picked up by workers in another project.
 """
 from django.core.management.base import BaseCommand
-from django_tasks import default_task_backend
+import django_rq
 import time
 import os
 
@@ -29,29 +29,30 @@ class Command(BaseCommand):
 
         self.stdout.write(f"[Web] Enqueueing task to bridge with data: {sensitive_data}")
 
-        # Enqueue task to bridge component
-        # We enqueue directly to the default backend (redis-web) with the task name
-        # that the bridge worker in the emb project expects
-        task_result = default_task_backend.enqueue(
-            "bridge.tasks.process_sensitive_data",
-            args=[sensitive_data],
-            kwargs={}
+        # Enqueue task to bridge queue using RQ directly
+        # The bridge worker in the emb project will pick this up
+        # We need to access the .func attribute to get the actual callable
+        queue = django_rq.get_queue('bridge')
+        job = queue.enqueue(
+            'bridge.tasks.process_sensitive_data.func',
+            sensitive_data,
         )
 
-        self.stdout.write(f"[Web] Task enqueued with ID: {task_result.id}")
+        self.stdout.write(f"[Web] Task enqueued with ID: {job.id}")
         self.stdout.write("[Web] Waiting for result...")
 
         # Poll for the result
         max_wait = 30  # seconds
         start_time = time.time()
         while time.time() - start_time < max_wait:
-            result = task_result.refresh()
-            if result.is_complete:
-                if result.is_failed:
-                    self.stdout.write(self.style.ERROR(f"\n[Web] Task failed: {result.exception_class}"))
-                else:
-                    self.stdout.write(self.style.SUCCESS(f"\n[Web] Received final result: {result.result}"))
+            job.refresh()
+            if job.is_finished:
+                result = job.return_value()
+                self.stdout.write(self.style.SUCCESS(f"\n[Web] Received final result: {result}"))
                 self.stdout.write(self.style.SUCCESS('\n=== Workflow Complete ===\n'))
+                return
+            elif job.is_failed:
+                self.stdout.write(self.style.ERROR(f"\n[Web] Task failed: {job.exc_info}"))
                 return
             time.sleep(0.5)
 

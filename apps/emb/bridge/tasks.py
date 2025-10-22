@@ -28,8 +28,15 @@ def process_sensitive_data(sensitive_data):
     task_result = process_with_ai_model.enqueue(non_sensitive_data)
 
     # Wait for the result (this blocks until the task completes)
-    # In database backend mode, tasks execute immediately
-    result = task_result.return_value
+    import time
+    max_wait = 30
+    start_time = time.time()
+    while time.time() - start_time < max_wait:
+        task_result.refresh()
+        if task_result.is_finished:
+            result = task_result.return_value
+            print(f"[Bridge] Received result from AI model: {result}")
+            return result
+        time.sleep(0.5)
 
-    print(f"[Bridge] Received result from AI model: {result}")
-    return result
+    raise TimeoutError("AI model task did not complete within 30 seconds")

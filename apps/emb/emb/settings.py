@@ -13,6 +13,7 @@ SECRET_KEY = 'django-insecure-emb-project-secret-key-change-in-production'
 INSTALLED_APPS = [
     'django.contrib.contenttypes',  # Required by Django
     'django_tasks',
+    'django_rq',  # For RQ worker management commands
     'bridge',
     'aimodel',
 ]
@@ -42,6 +43,25 @@ if os.environ.get('USE_REDIS'):
         "aimodel": {
             "BACKEND": "django_tasks.backends.rq.RQBackend",
             "BACKEND_OPTIONS": {"url": "redis://localhost:6380/0"},
+        },
+    }
+
+    # RQ_QUEUES configuration for django-rq
+    RQ_QUEUES = {
+        'default': {
+            'HOST': 'localhost',
+            'PORT': 6380,
+            'DB': 0,
+        },
+        'bridge': {
+            'HOST': 'localhost',
+            'PORT': 6379,
+            'DB': 0,
+        },
+        'aimodel': {
+            'HOST': 'localhost',
+            'PORT': 6380,
+            'DB': 0,
         },
     }
 else:

@@ -14,6 +14,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',  # Required by Django
     'django.contrib.auth',          # For sensitive data access
     'django_tasks',
+    'django_rq',  # For RQ worker management commands
     'core',
 ]
 
@@ -47,6 +48,20 @@ if os.environ.get('USE_REDIS'):
             "BACKEND": "django_tasks.backends.rq.RQBackend",
             "BACKEND_OPTIONS": {"url": "redis://localhost:6379/0"},
         }
+    }
+
+    # RQ_QUEUES configuration for django-rq
+    RQ_QUEUES = {
+        'default': {
+            'HOST': 'localhost',
+            'PORT': 6379,
+            'DB': 0,
+        },
+        'bridge': {
+            'HOST': 'localhost',
+            'PORT': 6379,
+            'DB': 0,
+        },
     }
 else:
     # Testing: Use immediate backend (synchronous execution)
