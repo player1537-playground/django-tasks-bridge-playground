@@ -1,44 +1,25 @@
 """
-Django settings for web project.
+Minimal Django settings for web project - tasks and management commands only.
 """
-
+import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# Required by Django
 SECRET_KEY = 'django-insecure-web-project-secret-key-change-in-production'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-
-# Application definition
+# Minimal installed apps for django-tasks + auth for sensitive data access
 INSTALLED_APPS = [
-    'django.contrib.contenttypes',
-    'django.contrib.auth',
+    'django.contrib.contenttypes',  # Required by Django
+    'django.contrib.auth',          # For sensitive data access
     'django_tasks',
-    'django_tasks.backends.database',
     'core',
 ]
 
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.middleware.common.CommonMiddleware',
-]
-
-ROOT_URLCONF = 'web.urls'
-
-TEMPLATES = []
-
-WSGI_APPLICATION = 'web.wsgi.application'
-
-# Database
-# For production, use PostgreSQL as shown in docker-compose.yml
-# For testing without Docker, use SQLite
-import os
+# Database configuration
+# Production: PostgreSQL with sensitive data
+# Testing: SQLite
 if os.environ.get('USE_POSTGRES'):
     DATABASES = {
         'default': {
@@ -59,30 +40,23 @@ else:
     }
 
 # Django Tasks Configuration
-# For production with Docker, use RQ backend with Redis
-# For testing, use database backend
 if os.environ.get('USE_REDIS'):
+    # Production: Use RQ backend with Redis
     TASKS = {
         "default": {
             "BACKEND": "django_tasks.backends.rq.RQBackend",
-            "BACKEND_OPTIONS": {
-                "url": "redis://localhost:6379/0",
-            },
+            "BACKEND_OPTIONS": {"url": "redis://localhost:6379/0"},
         }
     }
 else:
-    # For testing, use immediate backend which executes tasks synchronously
+    # Testing: Use immediate backend (synchronous execution)
     TASKS = {
         "default": {
             "BACKEND": "django_tasks.backends.immediate.ImmediateBackend",
         }
     }
 
-# Internationalization
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
+# Suppress Django system check warnings
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 USE_TZ = True
 
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

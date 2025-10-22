@@ -60,7 +60,43 @@ The system consists of two Django projects:
 └── docker-compose.yml    # Database and Redis services
 ```
 
-## Setup
+## Minimal Django Configuration
+
+Both projects use **minimal Django configurations** since they don't serve web pages:
+
+**What's included:**
+- `SECRET_KEY` - Required by Django
+- `INSTALLED_APPS` - Only essential apps (contenttypes, django_tasks, task apps)
+- `DATABASES` - Minimal database config (SQLite for testing, PostgreSQL for web in production)
+- `TASKS` - Django Tasks backend configuration
+- `DEFAULT_AUTO_FIELD` and `USE_TZ` - To suppress warnings
+
+**What's removed:**
+- No `MIDDLEWARE` - Not needed without HTTP requests
+- No `ROOT_URLCONF`, `urls.py` - No URL routing
+- No `WSGI_APPLICATION`, `wsgi.py` - No WSGI server
+- No `TEMPLATES` - No template rendering
+- No `ALLOWED_HOSTS` - No HTTP serving
+
+This keeps the configuration minimal and focused on task processing only.
+
+## Quick Testing (No Docker Required)
+
+To test the workflow without setting up Docker/Redis:
+
+```bash
+cd apps/emb
+pip install -r requirements.txt
+python manage.py migrate  # Creates local SQLite database
+python test_workflow.py
+```
+
+This runs the complete workflow synchronously using the immediate backend, demonstrating:
+- ✓ AI model task execution
+- ✓ Bridge task de-sensitizing data
+- ✓ Full workflow from sensitive input to final result
+
+## Full Setup (Production Mode with Redis)
 
 ### 1. Start Dependencies
 
@@ -92,24 +128,31 @@ cd apps/emb
 pip install -r requirements.txt
 ```
 
-### 3. Run Migrations (Web Project Only)
+### 3. Run Migrations
 
-The web project uses PostgreSQL:
+For web project with PostgreSQL:
 
 ```bash
 cd apps/web
+USE_POSTGRES=1 python manage.py migrate
+```
+
+For emb project with SQLite:
+
+```bash
+cd apps/emb
 python manage.py migrate
 ```
 
-## Running the Workflow
+## Running the Production Workflow (With Redis)
 
-You need three terminal windows to run the complete workflow:
+You need three terminal windows to run the complete workflow with Redis:
 
 ### Terminal 1: Bridge Worker
 
 ```bash
 cd apps/emb
-./run_bridge_worker.sh
+USE_REDIS=1 ./run_bridge_worker.sh
 ```
 
 This worker listens to `redis-web` (port 6379) for tasks from the web project.
@@ -118,7 +161,7 @@ This worker listens to `redis-web` (port 6379) for tasks from the web project.
 
 ```bash
 cd apps/emb
-./run_aimodel_worker.sh
+USE_REDIS=1 ./run_aimodel_worker.sh
 ```
 
 This worker listens to `redis-emb` (port 6380) for tasks from the bridge component.
@@ -127,7 +170,7 @@ This worker listens to `redis-emb` (port 6380) for tasks from the bridge compone
 
 ```bash
 cd apps/web
-python manage.py run_workflow
+USE_REDIS=1 python manage.py run_workflow
 ```
 
 This command will:

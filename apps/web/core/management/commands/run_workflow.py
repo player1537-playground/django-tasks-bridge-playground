@@ -1,15 +1,27 @@
 """
 Management command to trigger the cross-project task workflow
+
+NOTE: This command requires USE_REDIS=1 to work, as it enqueues tasks
+by name string to be picked up by workers in another project.
 """
 from django.core.management.base import BaseCommand
 from django_tasks import default_task_backend
 import time
+import os
 
 
 class Command(BaseCommand):
     help = 'Triggers the workflow: web -> bridge -> AI model -> bridge -> web'
 
     def handle(self, *args, **options):
+        if not os.environ.get('USE_REDIS'):
+            self.stdout.write(self.style.ERROR(
+                '\nERROR: This command requires USE_REDIS=1 to be set.\n'
+                'Cross-project task enqueueing requires Redis.\n'
+                '\nFor testing the workflow, use: apps/emb/test_workflow.py\n'
+            ))
+            return
+
         self.stdout.write(self.style.SUCCESS('\n=== Starting Cross-Project Task Workflow ===\n'))
 
         # Hardcoded sensitive data as per requirements
