@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: django-tasks-postgres
+    environment:
+      POSTGRES_DB: webdb
+      POSTGRES_USER: webuser
+      POSTGRES_PASSWORD: webpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./deps/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U webuser -d webdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis-web:
+    image: redis:7-alpine
+    container_name: django-tasks-redis-web
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./deps/redis-web:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis-emb:
+    image: redis:7-alpine
+    container_name: django-tasks-redis-emb
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./deps/redis-emb:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
