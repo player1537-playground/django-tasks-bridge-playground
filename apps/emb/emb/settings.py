@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'django_tasks',
     'django_rq',  # For RQ worker management commands
     'aimodel',
+    'bridge',  # Dummy task stubs for cross-project callback references
 ]
 
 # Minimal database configuration (required by Django)
@@ -27,6 +28,7 @@ DATABASES = {
 
 # Django Tasks Configuration
 # aimodel uses redis-emb (port 6380) for task processing
+# bridge backend configured to send callbacks to redis-web (port 6379)
 TASKS = {
     "default": {
         "BACKEND": "django_tasks.backends.rq.RQBackend",
@@ -37,6 +39,11 @@ TASKS = {
         "BACKEND": "django_tasks.backends.rq.RQBackend",
         "BACKEND_OPTIONS": {"url": "redis://localhost:6380/0"},
         "QUEUES": ["aimodel"],
+    },
+    "bridge": {
+        "BACKEND": "django_tasks.backends.rq.RQBackend",
+        "BACKEND_OPTIONS": {"url": "redis://localhost:6379/0"},
+        "QUEUES": ["bridge"],
     },
 }
 
@@ -50,6 +57,11 @@ RQ_QUEUES = {
     'aimodel': {
         'HOST': 'localhost',
         'PORT': 6380,
+        'DB': 0,
+    },
+    'bridge': {
+        'HOST': 'localhost',
+        'PORT': 6379,
         'DB': 0,
     },
 }

@@ -7,7 +7,7 @@ from django_tasks import task
 
 
 @task(backend="aimodel", queue_name="aimodel")
-def process_with_ai_model(data: str) -> str:
+def process_with_ai_model(data: str, return_task_id: str) -> str:
     """
     Stub for the AI model task that runs in the emb project.
     This should never actually execute - it's only used for enqueueing.

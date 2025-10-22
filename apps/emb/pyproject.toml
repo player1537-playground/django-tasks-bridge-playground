@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["emb*", "aimodel*"]
+include = ["emb*", "aimodel*", "bridge*"]
 
 [tool.uv.sources]
 django-tasks = { path = "../../libs/django_tasks", editable = true }
