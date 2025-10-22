@@ -21,4 +21,4 @@ print(f"   ✓ Bridge task configured correctly\n")
 
 print("=== Configuration Test Passed ===")
 print("\nNote: Full workflow testing requires the emb AI model project.")
-print("Run both w2e and emb workers with USE_REDIS=1 for end-to-end testing.")
+print("Run both w2e and emb workers for end-to-end testing.")

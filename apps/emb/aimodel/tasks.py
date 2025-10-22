@@ -4,7 +4,7 @@ AI Model tasks - processes non-sensitive data through AI model
 from django_tasks import task
 
 
-@task(backend="aimodel")
+@task(backend="aimodel", queue_name="aimodel")
 def process_with_ai_model(data):
     """
     Second emb component: Processes non-sensitive data through AI model.

@@ -47,7 +47,7 @@ aimodel_task_ref = ExternalTaskReference(
 )
 
 
-@task(backend="bridge")
+@task(backend="bridge", queue_name="bridge")
 def process_sensitive_data(sensitive_data):
     """
     W2E Bridge: Receives sensitive data from web project,

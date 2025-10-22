@@ -18,59 +18,40 @@ INSTALLED_APPS = [
     'core',
 ]
 
-# Database configuration
-# Production: PostgreSQL with sensitive data
-# Testing: SQLite
-if os.environ.get('USE_POSTGRES'):
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'webdb',
-            'USER': 'webuser',
-            'PASSWORD': 'webpass',
-            'HOST': 'localhost',
-            'PORT': '5432',
-        }
+# Database configuration - PostgreSQL with sensitive data
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'webdb',
+        'USER': 'webuser',
+        'PASSWORD': 'webpass',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
-# Django Tasks Configuration
-if os.environ.get('USE_REDIS'):
-    # Production: Use RQ backend with Redis
-    TASKS = {
-        "default": {
-            "BACKEND": "django_tasks.backends.rq.RQBackend",
-            "BACKEND_OPTIONS": {"url": "redis://localhost:6379/0"},
-            "QUEUES": ["default", "bridge"],
-        }
+# Django Tasks Configuration - RQ backend with Redis
+TASKS = {
+    "default": {
+        "BACKEND": "django_tasks.backends.rq.RQBackend",
+        "BACKEND_OPTIONS": {"url": "redis://localhost:6379/0"},
+        "QUEUES": ["default", "bridge"],
     }
+}
 
-    # RQ_QUEUES configuration for django-rq
-    RQ_QUEUES = {
-        'default': {
-            'HOST': 'localhost',
-            'PORT': 6379,
-            'DB': 0,
-        },
-        'bridge': {
-            'HOST': 'localhost',
-            'PORT': 6379,
-            'DB': 0,
-        },
-    }
-else:
-    # Testing: Use immediate backend (synchronous execution)
-    TASKS = {
-        "default": {
-            "BACKEND": "django_tasks.backends.immediate.ImmediateBackend",
-        }
-    }
+# RQ_QUEUES configuration for django-rq
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+    },
+    'bridge': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+    },
+}
 
 # Suppress Django system check warnings
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

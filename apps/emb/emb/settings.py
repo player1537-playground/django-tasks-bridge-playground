@@ -27,44 +27,32 @@ DATABASES = {
 
 # Django Tasks Configuration
 # aimodel uses redis-emb (port 6380) for task processing
-if os.environ.get('USE_REDIS'):
-    # Production: Use RQ backend with Redis
-    TASKS = {
-        "default": {
-            "BACKEND": "django_tasks.backends.rq.RQBackend",
-            "BACKEND_OPTIONS": {"url": "redis://localhost:6380/0"},
-            "QUEUES": ["default", "aimodel"],
-        },
-        "aimodel": {
-            "BACKEND": "django_tasks.backends.rq.RQBackend",
-            "BACKEND_OPTIONS": {"url": "redis://localhost:6380/0"},
-            "QUEUES": ["aimodel"],
-        },
-    }
+TASKS = {
+    "default": {
+        "BACKEND": "django_tasks.backends.rq.RQBackend",
+        "BACKEND_OPTIONS": {"url": "redis://localhost:6380/0"},
+        "QUEUES": ["default", "aimodel"],
+    },
+    "aimodel": {
+        "BACKEND": "django_tasks.backends.rq.RQBackend",
+        "BACKEND_OPTIONS": {"url": "redis://localhost:6380/0"},
+        "QUEUES": ["aimodel"],
+    },
+}
 
-    # RQ_QUEUES configuration for django-rq
-    RQ_QUEUES = {
-        'default': {
-            'HOST': 'localhost',
-            'PORT': 6380,
-            'DB': 0,
-        },
-        'aimodel': {
-            'HOST': 'localhost',
-            'PORT': 6380,
-            'DB': 0,
-        },
-    }
-else:
-    # Testing: Use immediate backend (synchronous execution)
-    TASKS = {
-        "default": {
-            "BACKEND": "django_tasks.backends.immediate.ImmediateBackend",
-        },
-        "aimodel": {
-            "BACKEND": "django_tasks.backends.immediate.ImmediateBackend",
-        },
-    }
+# RQ_QUEUES configuration for django-rq
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6380,
+        'DB': 0,
+    },
+    'aimodel': {
+        'HOST': 'localhost',
+        'PORT': 6380,
+        'DB': 0,
+    },
+}
 
 # Suppress Django system check warnings
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
