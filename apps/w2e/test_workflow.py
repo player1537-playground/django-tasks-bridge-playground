@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 """
 Test script to verify the task workflow logic works correctly.
-This tests the emb project's bridge and AI model tasks locally.
+This tests the w2e bridge and emb AI model tasks locally.
 """
 import os
 import sys
 import django
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emb.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'w2e.settings')
 django.setup()
 
 from bridge.tasks import process_sensitive_data

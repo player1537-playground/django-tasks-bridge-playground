@@ -4,12 +4,11 @@ This project demonstrates a cross-project Django Tasks workflow with a bridge pa
 
 ## Architecture
 
-The system consists of two Django projects:
+The system consists of three Django projects:
 
 1. **web** (`apps/web/`) - Handles sensitive data and initiates workflows
-2. **emb** (`apps/emb/`) - Contains two components:
-   - **bridge** - De-sensitizes data and forwards to AI model
-   - **aimodel** - Processes non-sensitive data through AI model
+2. **w2e** (`apps/w2e/`) - Web-to-Emb bridge that de-sensitizes data
+3. **emb** (`apps/emb/`) - AI model that processes non-sensitive data
 
 ## Data Flow
 
@@ -19,16 +18,16 @@ The system consists of two Django projects:
     | (1) Enqueues "first-emb-request"
     |     to redis-web queue
     v
-[Bridge Component]
+[W2E Bridge]
     |
     | (2) De-sensitizes to "second-emb-request"
     |     Enqueues to redis-emb queue
     v
-[AI Model Component]
+[Emb AI Model]
     |
     | (3) Returns "second-emb-result"
     v
-[Bridge Component]
+[W2E Bridge]
     |
     | (4) Returns result
     v
@@ -45,14 +44,21 @@ The system consists of two Django projects:
 │   ├── web/              # Django project with sensitive data access
 │   │   ├── web/          # Project settings
 │   │   ├── core/         # Core app with management command
-│   │   └── manage.py
-│   └── emb/              # Django project with bridge and AI model
+│   │   ├── manage.py
+│   │   └── requirements.txt
+│   ├── w2e/              # Web-to-Emb bridge project
+│   │   ├── w2e/          # Project settings
+│   │   ├── bridge/       # Bridge component (de-sensitization)
+│   │   ├── manage.py
+│   │   ├── run_worker.sh # Bridge worker script
+│   │   ├── test_workflow.py
+│   │   └── requirements.txt
+│   └── emb/              # AI model project
 │       ├── emb/          # Project settings
-│       ├── bridge/       # Bridge component (de-sensitization)
 │       ├── aimodel/      # AI model component
 │       ├── manage.py
-│       ├── run_bridge_worker.sh    # Bridge worker script
-│       └── run_aimodel_worker.sh   # AI model worker script
+│       ├── run_worker.sh # AI model worker script
+│       └── requirements.txt
 ├── deps/                 # Dependencies data (gitignored)
 │   ├── postgres/
 │   ├── redis-web/
@@ -62,7 +68,7 @@ The system consists of two Django projects:
 
 ## Minimal Django Configuration
 
-Both projects use **minimal Django configurations** since they don't serve web pages:
+All three projects use **minimal Django configurations** since they don't serve web pages:
 
 **What's included:**
 - `SECRET_KEY` - Required by Django
@@ -85,7 +91,7 @@ This keeps the configuration minimal and focused on task processing only.
 To test the workflow without setting up Docker/Redis:
 
 ```bash
-cd apps/emb
+cd apps/w2e
 pip install -r requirements.txt
 python manage.py migrate  # Creates local SQLite database
 python test_workflow.py
@@ -121,7 +127,14 @@ cd apps/web
 pip install -r requirements.txt
 ```
 
-For the emb project:
+For the w2e bridge project:
+
+```bash
+cd apps/w2e
+pip install -r requirements.txt
+```
+
+For the emb AI model project:
 
 ```bash
 cd apps/emb
@@ -137,7 +150,14 @@ cd apps/web
 USE_POSTGRES=1 python manage.py migrate
 ```
 
-For emb project with SQLite:
+For w2e bridge project with SQLite:
+
+```bash
+cd apps/w2e
+python manage.py migrate
+```
+
+For emb AI model project with SQLite:
 
 ```bash
 cd apps/emb
@@ -148,23 +168,23 @@ python manage.py migrate
 
 You need three terminal windows to run the complete workflow with Redis:
 
-### Terminal 1: Bridge Worker
+### Terminal 1: W2E Bridge Worker
 
 ```bash
-cd apps/emb
-USE_REDIS=1 ./run_bridge_worker.sh
+cd apps/w2e
+USE_REDIS=1 ./run_worker.sh
 ```
 
 This worker listens to `redis-web` (port 6379) for tasks from the web project.
 
-### Terminal 2: AI Model Worker
+### Terminal 2: Emb AI Model Worker
 
 ```bash
 cd apps/emb
-USE_REDIS=1 ./run_aimodel_worker.sh
+USE_REDIS=1 ./run_worker.sh
 ```
 
-This worker listens to `redis-emb` (port 6380) for tasks from the bridge component.
+This worker listens to `redis-emb` (port 6380) for tasks from the w2e bridge.
 
 ### Terminal 3: Trigger Workflow
 
