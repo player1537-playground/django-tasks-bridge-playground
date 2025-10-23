@@ -2,7 +2,7 @@
 Management command to trigger the cross-project task workflow
 """
 from django.core.management.base import BaseCommand
-from bridge.tasks import web_to_emb
+from foobar_w2e.tasks import web_to_emb
 
 
 class Command(BaseCommand):

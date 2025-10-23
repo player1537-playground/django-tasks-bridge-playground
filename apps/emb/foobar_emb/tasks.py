@@ -2,10 +2,10 @@
 AI Model tasks - processes non-sensitive data through AI model
 """
 from django_tasks import task
-from bridge.tasks import emb_to_web
+from foobar_w2e.tasks import emb_to_web
 
 
-@task(backend="aimodel", queue_name="aimodel")
+@task(backend="emb", queue_name="emb")
 def process_with_ai_model(data: str, return_task_id: str):
     """
     Processes non-sensitive data through AI model and triggers callback.
